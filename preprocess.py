@@ -39,9 +39,9 @@ def filter_long50(string):
 
 
 def test():
-    path = '/u/lupeng/Project/dataset_OIE/reverb/extractions-all-labeled.txt'
+    path = '/home/peng-lu/Projects/deepie/data/extractions-all-labeled.txt'
     pairs = load_data(path)
-    pprint.pprint(pairs[:1])
+    pprint.pprint(pairs[0])
 
 if __name__ == '__main__':
     test()
