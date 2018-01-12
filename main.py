@@ -16,7 +16,7 @@ import json
 import faiss
 
 import model
-import dataloader
+import preprocess
 import utils
 import dataloader
 import load_kb
@@ -93,35 +93,47 @@ pretrain_em = args.pretrain_em
 model_path = args.model_path
 
 ############################### Load data ###############################
-train_path= "/u/lupeng/Project/code/vqvae_kb/data/processed/ontonotes5/ontonotes.train"
-dev_path= "/u/lupeng/Project/code/vqvae_kb/data/processed/ontonotes5/ontonotes.dev"
-testpath= "/u/lupeng/Project/code/vqvae_kb/data/processed/ontonotes5/ontonotes.test"
-sentences_train, labels_train = dataloader.readfile(train_path)
-sentences_dev, labels_dev = dataloader.readfile(dev_path)
-word_dict = dataloader.build_word_dict(sentences_train + sentences_dev)
-tag_dict = dataloader.build_label_dict(labels_train + labels_dev)
+cwd = os.getcwd()
+datapth = os.path.join(cwd, "extractions-all-labeled.txt")
+sent, triple, label= load_data(path)
+print(len(sent))
+sent_path = os.path.join(pwd, "data/sents.txt")
+triple_path = os.path.join(pwd, "data/triples.txt")
+label_path = os.path.join(pwd, "data/labels.txt")
 
-word2id, id2word = dataloader.create_mapping_with_unk(word_dict)
-tag2id, id2tag = dataloader.create_mapping(tag_dict)
-pre_weights = dataloader.init_emb(word2id)
+word_dict = preprocess.build_word_dict(sent+triple)
+label_dict = preprocess.build_label_dict(label)
+
+sword_to_id, id_to_sword = preprocess.create_mapping_with_unk(word_dict)
+label_to_id, id_to_label = preprocess.create_mapping(label_dict)
+
+sents, triples, labels = preprocess.random_array(sent,
+                                                 triple,
+                                                 label,
+                                                 sword_to_id,
+                                                 label_to_id)
+
 
 print("Load data...")
-inputseqs_train, realtags_train = dataloader.loadseqs(sentences_train, labels_train, word2id, tag2id)
-inputseqs_dev, realtags_dev = dataloader.loadseqs(sentences_dev, labels_dev, word2id, tag2id)
-sentences_test, labels_test = dataloader.readfile(testpath)
-inputseqs_test, realtags_test = dataloader.loadseqs(sentences_test, labels_test, word2id, tag2id)
+sents_train = sents[:5798]
+sents_dev = sents[5798:]
+triples_train = triples[:5798]
+triples_dev = triples[5798:]
+labels_train = labels[:5798]
+labels_dev = labels[5798:]
+
 
 
 print("#### Data detail ####")
-print("The number of data in train set %d" % len(inputseqs_train))
-print("The number of data in dev set %d" % len(inputseqs_dev))
-print("The number of tokens in traina and dev set: %d" %len(word2id))
+print("The number of data in train set %d" % len(sents_train))
+print("The number of data in dev set %d" % len(sents_dev))
+print("The number of tokens in traina and dev set: %d" %len(sword2id))
 
 
 #########################################################################
 
 ############################## Build model ##############################
-discriminator = model.discriminator(input_size=len(word2id),
+discriminator = model.discriminator(input_size=len(sword2id),
                                     em_size=emb_size,
                                     concept_size=concept_size,
                                     dropout=dropout_p)
