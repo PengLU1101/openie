@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 import torchtext
+from torch.utils.data import Dataset, DataLoader
 
 
 import numpy as np
@@ -122,7 +123,9 @@ def write_txt(path, file):
     with open(path, "a") as f:
         for i in file:
             f.write(i + '\n')
-
+class sent_triple_dataset(Dataset):
+    #self.sent_triple = a
+    pass
 def test():
     pwd = os.getcwd()
     path = os.path.join(pwd, "data/extractions-all-labeled.txt")
@@ -147,6 +150,8 @@ def test():
     print("sum", sum(index))
     print("sum l", sum(labels))
     print("sum ll", sum(ll))
+    files = np.loadtxt(path)
+    print(files[:10])
 
 
 
